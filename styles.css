@@ -1,0 +1,527 @@
+/* Reset y configuración básica */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #fff5f8; /* Color plano en lugar de gradiente */
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  overflow: hidden;
+  transition: background 0.5s ease; /* Reducido de 0.8s */
+}
+
+body.night-mode {
+  background: #101630;
+  color: #f5f5f5;
+}
+
+/* Loader optimizado */
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff5f8;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  transition: opacity 0.3s ease-out; /* Reducido de original */
+}
+
+.night-mode #loader {
+  background: #101630;
+}
+
+.loader-heart {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background-color: #ec407a;
+  transform: rotate(-45deg);
+  animation: loaderPulse 1.5s ease infinite;
+}
+
+.loader-heart::before,
+.loader-heart::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #ec407a;
+  border-radius: 50%;
+}
+
+.loader-heart::before {
+  top: -50%;
+}
+
+.loader-heart::after {
+  top: 0;
+  left: 50%;
+}
+
+#loader p {
+  color: #ec407a;
+  font-weight: bold;
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+.night-mode #loader p {
+  color: #9198e5;
+}
+
+@keyframes loaderPulse {
+  0%, 100% { transform: rotate(-45deg) scale(0.8); }
+  50% { transform: rotate(-45deg) scale(1); }
+}
+
+/* Collage de fondo - menos opacidad para mejor rendimiento */
+.background-collage {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.12; /* Reducido de 0.15 */
+  filter: blur(2px); /* Reducido de 3px */
+  transition: opacity 0.5s ease; /* Reducido de 0.8s */
+  will-change: opacity; /* Hint para mejorar rendimiento */
+}
+
+.night-mode .background-collage {
+  opacity: 0.08; /* Reducido de 0.1 */
+  filter: blur(2px) brightness(0.7);
+}
+
+.collage-img {
+  position: absolute;
+  width: 200px;
+  height: 150px;
+  border: 5px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sombra más ligera */
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+.collage-img:hover {
+  z-index: 2;
+  transform: scale(1.05);
+}
+
+.night-mode .collage-img {
+  border-color: rgba(60, 70, 90, 0.8);
+}
+
+.collage-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Tarjeta principal */
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 30px;
+  border-radius: 20px;
+  width: 850px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08); /* Sombra más ligera */
+  position: relative;
+  overflow: hidden;
+  transition: background 0.5s ease, box-shadow 0.5s ease; /* Propiedades específicas */
+  opacity: 0;
+  animation: fadeIn 0.8s ease-in-out 0.3s forwards;
+  backdrop-filter: blur(4px); /* Reducido de 5px */
+  -webkit-backdrop-filter: blur(4px);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.night-mode .card {
+  background: rgba(30, 40, 60, 0.85);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: #ec407a;
+  transition: background 0.5s ease; /* Reducido de 0.8s */
+}
+
+.night-mode .card::before {
+  background: #9198e5;
+}
+
+/* Controles (música y modo día/noche) */
+.controls {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 10px;
+  z-index: 100;
+}
+
+.control-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.8);
+  color: #d81b60;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08); /* Sombra más ligera */
+  transition: transform 0.3s ease, background 0.3s ease, color 0.3s ease;
+}
+
+.night-mode .control-btn {
+  background: rgba(60, 70, 90, 0.8);
+  color: #9198e5;
+}
+
+.control-btn:hover {
+  transform: scale(1.1);
+}
+
+.control-btn.active {
+  background: #d81b60;
+  color: white;
+}
+
+.night-mode .control-btn.active {
+  background: #5d4ebb;
+  color: white;
+}
+
+/* Sección de texto */
+.text {
+  flex: 1;
+  margin-right: 30px;
+  padding-right: 20px;
+  z-index: 10;
+  transition: color 0.5s ease; /* Reducido de 0.8s */
+}
+
+.night-mode .text {
+  color: #e0e0e0;
+}
+
+.text h1 {
+  font-family: 'Dancing Script', cursive;
+  font-size: 2.8rem; /* Ligeramente reducido */
+  margin-bottom: 20px;
+  color: #d81b60;
+  transition: color 0.5s ease; /* Reducido de 0.8s */
+}
+
+.night-mode .text h1 {
+  color: #9198e5;
+}
+
+.text p {
+  line-height: 1.7; /* Ligeramente reducido */
+  font-size: 1.1rem; /* Ligeramente reducido */
+  margin-bottom: 20px;
+  color: #555;
+  transition: color 0.5s ease; /* Reducido de 0.8s */
+}
+
+.night-mode .text p {
+  color: #c7c7c7;
+}
+
+/* Temporizador */
+.timer {
+  margin-top: 30px;
+  background: rgba(254, 245, 249, 0.8);
+  padding: 18px; /* Ligeramente reducido */
+  border-radius: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* Sombra más ligera */
+  transition: background 0.5s ease, box-shadow 0.5s ease; /* Propiedades específicas */
+  border-left: 4px solid #ec407a;
+}
+
+.night-mode .timer {
+  background: rgba(40, 50, 70, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #9198e5;
+}
+
+.timer p {
+  font-size: 1.05rem; /* Ligeramente reducido */
+  color: #555;
+  transition: color 0.5s ease; /* Reducido de 0.8s */
+}
+
+.night-mode .timer p {
+  color: #c7c7c7;
+}
+
+.timer p:first-child {
+  color: #ec407a;
+  font-weight: bold;
+  margin-bottom: 8px;
+  transition: color 0.5s ease; /* Reducido de 0.8s */
+  font-size: 1.15rem; /* Ligeramente reducido */
+}
+
+.night-mode .timer p:first-child {
+  color: #9198e5;
+}
+
+#timer {
+  font-weight: bold;
+  color: #333;
+  transition: color 0.5s ease; /* Reducido de 0.8s */
+  font-size: 1.1rem; /* Ligeramente reducido */
+}
+
+.night-mode #timer {
+  color: #e0e0e0;
+}
+
+.bar {
+  height: 8px; /* Reducido de 10px */
+  background: #f5f5f5;
+  border-radius: 4px; /* Reducido de 5px */
+  overflow: hidden;
+  margin-top: 15px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08); /* Sombra más ligera */
+  transition: background 0.5s ease; /* Reducido de 0.8s */
+}
+
+.night-mode .bar {
+  background: #2c3448;
+}
+
+.progress {
+  height: 100%;
+  background: #ec407a;
+  width: 0%;
+  transition: width 1s linear, background 0.5s ease; /* Reducido tiempo de transición */
+  border-radius: 4px; /* Reducido de 5px */
+  will-change: width; /* Hint para mejor rendimiento */
+}
+
+.night-mode .progress {
+  background: #9198e5;
+}
+
+/* Árbol animado */
+.tree {
+  flex: 1;
+  position: relative;
+  max-width: 350px;
+  height: 400px;
+  margin-left: 20px;
+  overflow: visible;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 18px;
+  transition: background 0.5s ease; /* Reducido de 0.8s */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); /* Sombra más ligera */
+}
+
+.night-mode .tree {
+  background: rgba(40, 50, 70, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+canvas {
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  image-rendering: optimizeSpeed; /* Mejora rendimiento en navegadores */
+}
+
+.heart-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+  will-change: transform; /* Hint para renderizado por GPU */
+}
+
+.heart {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #ff4081;
+  transform: rotate(-45deg) scale(0);
+  opacity: 0;
+  will-change: transform, opacity; /* Hint para mejorar animaciones */
+}
+
+@keyframes fallAndFade {
+  0% { transform: rotate(-45deg) scale(0); opacity: 0; }
+  10% { transform: rotate(-45deg) scale(1); opacity: 1; }
+  60% { transform: rotate(-45deg) translate(0, 100px) scale(1); opacity: 1; }
+  100% { transform: rotate(-45deg) translate(0, 300px) scale(0.5); opacity: 0; }
+}
+
+@keyframes appear {
+  0% { transform: rotate(-45deg) scale(0); opacity: 0; }
+  100% { transform: rotate(-45deg) scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: rotate(-45deg) scale(1); }
+  100% { transform: rotate(-45deg) scale(1.2); }
+}
+
+.heart.falling {
+  animation: fallAndFade 3s ease-in forwards;
+}
+
+.heart.permanent {
+  animation: appear 1s ease-in forwards, pulse 2s ease-in-out infinite alternate;
+}
+
+.heart::before,
+.heart::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: inherit;
+  border-radius: 50%;
+}
+
+.heart::before {
+  top: -50%;
+}
+
+.heart::after {
+  top: 0;
+  left: 50%;
+}
+
+/* Birds container optimizado */
+.birds-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.bird {
+  position: absolute;
+  width: 20px; /* Reducido de 22px */
+  height: 15px; /* Reducido de 16px */
+  background: transparent;
+  pointer-events: none;
+  transition: color 0.5s ease; /* Solo transición de color */
+  will-change: transform; /* Hint para mejor rendimiento */
+}
+
+.bird::before,
+.bird::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+}
+
+.bird::before {
+  width: 20px; /* Reducido de 22px */
+  height: 7px; /* Reducido de 8px */
+  border-radius: 50% 50% 0 0;
+  top: 0;
+}
+
+.bird::after {
+  width: 9px; /* Reducido de 10px */
+  height: 9px; /* Reducido de 10px */
+  border-radius: 50%;
+  top: 5px;
+  left: 6px;
+}
+
+@keyframes birdFly {
+  0%, 100% { transform: translate(0, 0) scaleX(1); }
+  25% { transform: translate(25px, -20px) scaleX(1); }
+  50% { transform: translate(50px, 0) scaleX(-1); }
+  75% { transform: translate(25px, 20px) scaleX(-1); }
+}
+
+/* Media queries para adaptarse a pantallas más pequeñas */
+@media (max-width: 900px) {
+  .card {
+    width: 95%;
+    padding: 25px 20px;
+    flex-direction: column;
+  }
+  
+  .text {
+    margin-right: 0;
+    padding-right: 0;
+    margin-bottom: 30px;
+  }
+  
+  .tree {
+    max-width: 100%;
+    margin-left: 0;
+    height: 350px;
+  }
+  
+  .text h1 {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 500px) {
+  .card {
+    padding: 20px 15px;
+  }
+  
+  .text h1 {
+    font-size: 2.2rem;
+  }
+  
+  .text p {
+    font-size: 1rem;
+  }
+  
+  .tree {
+    height: 300px;
+  }
+  
+  .timer {
+    padding: 15px;
+  }
+  
+  #timer {
+    font-size: 0.95rem;
+  }
+}
