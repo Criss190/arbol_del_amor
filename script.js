@@ -577,3 +577,4 @@ function generateLeaves() {
   // Añadir todos los corazones al DOM de una vez
   heartContainer.appendChild(fragment);
 }
+
