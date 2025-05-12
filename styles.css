@@ -10,7 +10,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: #fff5f8; /* Color plano en lugar de gradiente */
+  background: #fce4ec; /* Color plano en lugar de gradiente */
   font-family: 'Poppins', sans-serif;
   color: #333;
   overflow: hidden;
@@ -18,8 +18,8 @@ body {
 }
 
 body.night-mode {
-  background: #101630;
-  color: #f5f5f5;
+  background: #1a1b2f;
+  color: #f0f0f0;
 }
 
 /* Loader optimizado */
@@ -87,22 +87,24 @@ body.night-mode {
 }
 
 /* Ajustes para el collage de fondo */
-.background-collage {
+#background-collage {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   z-index: -1;
-  opacity: 0.25; /* Aumentado de 0.12 para mayor visibilidad */
-  transition: opacity 0.5s ease;
-  will-change: opacity;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
-  gap: 5px;
-  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Distribuir imágenes hacia los lados */
+  align-items: center; /* Centrar verticalmente */
+  pointer-events: none;
+  background: url('./foticos/playa-romantica.jpeg') center/cover no-repeat;
+  opacity: 0.85;
+  padding: 20px; /* Añadir espacio alrededor */
+  
 }
+
 
 .night-mode .background-collage {
   opacity: 0.18; /* Aumentado de 0.08 para mayor visibilidad */
@@ -111,29 +113,104 @@ body.night-mode {
 
 .collage-img {
   position: relative;
-  width: 100%;
-  height: 100%;
-  border: 5px solid white;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 150px;
+  height: 150px;
+  margin: 12px;
+  border-radius: 10px;
   overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border: 4px solid white;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transform-origin: center;
+  animation: floatImage 10s infinite ease-in-out;
+  animation-delay: calc(var(--delay) * 1s);
+}
+
+.collage-img:nth-child(odd) {
+  animation-direction: alternate-reverse;
+}
+/* Añadir efecto de brillo al pasar el cursor */
+.collage-img::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 20%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(30deg);
+  transition: transform 0.7s ease;
+}
+
+.collage-img:hover::after {
+  transform: rotate(30deg) translateX(300%);
+}
+
+/* Estilo del marco de las fotos */
+.night-mode .collage-img {
+  border-color: rgba(80, 90, 120, 0.8);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
+}
+
+/* Añadir nombre al hover */
+.collage-img .photo-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 8px 0;
+  text-align: center;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.collage-img:hover .photo-caption {
+  transform: translateY(0);
 }
 
 .collage-img:hover {
-  z-index: 2;
   transform: scale(1.1) rotate(0deg) !important;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  z-index: 10;
 }
 
 .night-mode .collage-img {
   border-color: rgba(60, 70, 90, 0.8);
 }
 
+
 .collage-img img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
+
+/* Animación suave para las imágenes */
+@keyframes floatImage {
+  0% { transform: translate(0, 0) rotate(var(--rotation)); }
+  50% { transform: translate(var(--tx), var(--ty)) rotate(var(--rotation)); }
+  100% { transform: translate(0, 0) rotate(var(--rotation)); }
+}
+
+/* Modo noche para el collage */
+.night-mode #background-collage .collage-img {
+  border-color: rgba(123, 104, 238, 0.6);
+  box-shadow: 0 4px 8px rgba(123, 104, 238, 0.4);
+}
+
+/* Distribuir imágenes en diferentes regiones de la pantalla */
+.collage-region-1 { top: 5%; left: 5%; }
+.collage-region-2 { top: 5%; right: 5%; }
+.collage-region-3 { bottom: 15%; left: 5%; }
+.collage-region-4 { bottom: 15%; right: 5%; }
+.collage-region-5 { top: 30%; left: 25%; }
+.collage-region-6 { top: 30%; right: 25%; }
+.collage-region-7 { bottom: 40%; left: 25%; }
+.collage-region-8 { bottom: 40%; right: 25%; }
+.collage-region-9 { top: 50%; left: 45%; }
 
 /* Tarjeta principal */
 .card {
@@ -141,11 +218,11 @@ body.night-mode {
   justify-content: space-between;
   align-items: flex-start;
   flex-wrap: wrap;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.85);
   padding: 30px;
   border-radius: 20px;
   width: 850px;
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.08); /* Sombra más ligera */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06); /* Sombra más ligera */
   position: relative;
   overflow: hidden;
   transition: background 0.5s ease, box-shadow 0.5s ease; /* Propiedades específicas */
@@ -161,7 +238,7 @@ body.night-mode {
 }
 
 .night-mode .card {
-  background: rgba(30, 40, 60, 0.85);
+  background: rgba(30, 30, 50, 0.9);
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
 }
 
@@ -265,7 +342,7 @@ body.night-mode {
 /* Temporizador */
 .timer {
   margin-top: 30px;
-  background: rgba(254, 245, 249, 0.8);
+  background: rgba(255, 240, 245, 0.8);
   padding: 18px; /* Ligeramente reducido */
   border-radius: 15px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04); /* Sombra más ligera */
@@ -274,7 +351,7 @@ body.night-mode {
 }
 
 .night-mode .timer {
-  background: rgba(40, 50, 70, 0.8);
+  background: rgba(35, 40, 60, 0.85);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border-left: 4px solid #9198e5;
 }
@@ -328,7 +405,7 @@ body.night-mode {
 
 .progress {
   height: 100%;
-  background: #ec407a;
+  background: #f06292;
   width: 0%;
   transition: width 1s linear, background 0.5s ease; /* Reducido tiempo de transición */
   border-radius: 4px; /* Reducido de 5px */
@@ -336,7 +413,7 @@ body.night-mode {
 }
 
 .night-mode .progress {
-  background: #9198e5;
+  background: #a78bfa;
 }
 
 /* Árbol animado */
@@ -349,8 +426,8 @@ body.night-mode {
   overflow: visible;
   background: rgba(255, 255, 255, 0.3);
   border-radius: 18px;
-  transition: background 0.5s ease; /* Reducido de 0.8s */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06); /* Sombra más ligera */
+  transition: background 0.5s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
 }
 
 .night-mode .tree {
@@ -380,42 +457,39 @@ canvas {
 
 .heart {
   position: absolute;
-  width: 12px; /* Aumentado ligeramente para mejor visibilidad */
-  height: 12px;
-  background-color: #ff4081;
-  transform: rotate(-45deg) scale(0);
-  opacity: 0;
-  will-change: transform, opacity; /* Hint para mejorar animaciones */
-  transition: background-color 0.5s ease; /* Para cambio de color en modo noche */
-  z-index: 5; /* Asegurar que están encima del canvas */
+  width: 20px;
+  height: 20px;
+  background: red;
+  transform: rotate(-45deg);
+  transform-origin: center;
+  border-radius: 50% 50% 0 0;
 }
 
 /* Pseudo-elementos mejorados para forma de corazón */
 .heart::before,
 .heart::after {
-  content: '';
+  content: "";
   position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: inherit; /* Hereda el color del elemento padre */
+  width: 20px;
+  height: 20px;
+  background: inherit;
   border-radius: 50%;
-  transition: background-color 0.5s ease;
 }
 
 .heart::before {
-  top: -50%;
+  top: -10px;
   left: 0;
 }
 
 .heart::after {
+  left: 10px;
   top: 0;
-  left: 50%;
 }
 
 /* Animaciones optimizadas para mejorar rendimiento */
 @keyframes heartAppear {
   0% { transform: rotate(-45deg) scale(0); opacity: 0; }
-  50% { transform: rotate(-45deg) scale(1.2); opacity: 0.8; }
+  50% { transform: rotate(-45deg) scale(1.2); opacity: 0.9; }
   100% { transform: rotate(-45deg) scale(1); opacity: 1; }
 }
 
@@ -430,12 +504,16 @@ canvas {
     transform: rotate(-45deg) translateY(0) scale(1); 
     opacity: 1;
   }
+  50% {
+    transform: rotate(-45deg) translateY(100px) scale(0.9) translateX(10px); 
+    opacity: 0.9;
+  }
   75% { 
-    transform: rotate(-45deg) translateY(150px) scale(0.9) translateX(20px); 
-    opacity: 0.8;
+    transform: rotate(-45deg) translateY(200px) scale(0.7) translateX(20px); 
+    opacity: 0.7;
   }
   100% { 
-    transform: rotate(-45deg) translateY(300px) scale(0.5) translateX(-10px); 
+    transform: rotate(-45deg) translateY(350px) scale(0.5) translateX(-10px); 
     opacity: 0;
   }
 }
@@ -444,11 +522,11 @@ canvas {
 .heart.permanent {
   animation: 
     heartAppear 0.8s ease-out forwards,
-    heartPulse 3s ease-in-out infinite;
+    heartPulse 6s ease-in-out infinite;
 }
 
 .heart.falling {
-  animation: heartFall 4s ease-in forwards;
+  animation: heartFall 6s ease-in forwards;
   z-index: 6; /* Asegura que los que caen están encima */
 }
 
@@ -504,18 +582,170 @@ canvas {
   75% { transform: translate(25px, 20px) scaleX(-1); }
 }
 
-/* Estilos para el reproductor de Spotify añadidos */
-#spotify-player-container {
-  transition: opacity 0.3s ease;
-  border-radius: 10px;
-  overflow: hidden;
+/* Estilos para el reproductor de audio */
+:root {
+  --music-pulse-intensity: 0.5;
+}
+
+.audio-control {
+  position: absolute;
+  top: 60px;
+  right: 15px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 10px;
+  width: 200px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  transition: all 0.3s ease;
+  transform-origin: top right;
+  animation: fadeInControl 0.5s ease forwards;
 }
 
-.night-mode #spotify-player-container {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+@keyframes fadeInControl {
+  from { transform: translateY(-10px) scale(0.95); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
 }
 
+.night-mode .audio-control {
+  background: rgba(40, 45, 65, 0.9);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.music-info {
+  margin-bottom: 8px;
+}
+
+.song-title {
+  display: block;
+  color: #d81b60;
+  font-weight: 500;
+  font-size: 14px;
+  margin-bottom: 5px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.night-mode .song-title {
+  color: #9198e5;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+
+.volume-control i {
+  color: #888;
+  font-size: 12px;
+  flex: 0 0 auto;
+}
+
+.volume-slider {
+  flex: 1;
+  margin: 0 8px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ddd;
+  border-radius: 2px;
+  outline: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #d81b60;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.night-mode .volume-slider::-webkit-slider-thumb {
+  background: #9198e5;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #d81b60;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.night-mode .volume-slider::-moz-range-thumb {
+  background: #9198e5;
+}
+
+/* Visualizador de música */
+.music-visualizer {
+  height: 30px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 5px;
+}
+
+.music-visualizer .bar {
+  width: 15%;
+  height: 3px;
+  background: #d81b60;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.2s ease;
+}
+
+.night-mode .music-visualizer .bar {
+  background: #9198e5;
+}
+
+/* Animación de pulsación para elementos cuando hay música */
+@keyframes musicPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(calc(1 + var(--music-pulse-intensity) * 0.05)); }
+}
+
+/* Aplicar pulsación cuando la música está activa */
+body.music-playing .card {
+  animation: musicPulse 4s ease-in-out infinite;
+}
+
+body.music-playing .heart.permanent {
+  animation: 
+    heartAppear 0.8s ease-out forwards,
+    heartPulse calc(6s - var(--music-pulse-intensity) * 2s) ease-in-out infinite;
+}
+
+/* Responsividad para el control de audio */
+@media (max-width: 900px) {
+  .audio-control {
+    width: 180px;
+    top: 70px;
+  }
+}
+
+@media (max-width: 500px) {
+  .audio-control {
+    width: 150px;
+    padding: 8px;
+    top: 60px;
+  }
+  
+  .song-title {
+    font-size: 12px;
+  }
+  
+  .volume-control i {
+    font-size: 10px;
+  }
+}
 /* Estilos para estrellas en el modo noche */
 .star {
   position: absolute;

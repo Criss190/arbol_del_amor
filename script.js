@@ -5,10 +5,22 @@ window.addEventListener('DOMContentLoaded', () => {
   const heartContainer = document.querySelector('.heart-container');
   const birdsContainer = document.querySelector('.birds-container');
   const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas && canvas.getContext('2d'); // Verificar que canvas existe
   const toggleMusicBtn = document.getElementById('toggleMusic');
   const toggleModeBtn = document.getElementById('toggleMode');
+  const toggleHeartsBtn = document.getElementById('toggleHearts');
+  
+  // Verificar si todos los elementos necesarios existen
+  if (!canvas || !ctx) {
+    console.error("No se pudo encontrar el elemento canvas o su contexto");
+    return; // Salir si no hay canvas
+  }
+  
+  // Asegurarse de que exista un contenedor para el collage
   const collageContainer = document.getElementById('background-collage');
+  if (!collageContainer) {
+    console.warn("No se encontró el contenedor del collage");
+  }
 
   // Variables globales
   let W, H;
@@ -19,7 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let seed = { x: null, y: null, size: 8 };
   let treeProgress = 0;
   let nightMode = false;
-  let fallingHeartsActive = false;
+  let fallingHeartsActive = true; // Activado por defecto
   let needsRedraw = true;
   let lastFrameTime = 0;
   const FPS_LIMIT = 30; // Limitar a 30 FPS para mejor rendimiento
@@ -30,7 +42,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const imagePaths = [
     "foticos/A.jpg", "foticos/C.jpg", "foticos/E.jpg",
     "foticos/I.jpg", "foticos/MIA.jpg", "foticos/N.jpg", 
-    "foticos/P.jpg", "foticos/R.jpg", "foticos/S.jpg"
+    "foticos/P.jpg", "foticos/AM.jpg", 
+    "foticos/CHO.jpg", "foticos/MO.jpg", "foticos/MU.jpg", "foticos/TE.jpg"
   ];
   
   // Función para precargar imágenes - solo para el collage
@@ -83,31 +96,30 @@ window.addEventListener('DOMContentLoaded', () => {
     preloadImages().then(validImagePaths => {
       // Actualizar la lista de imágenes con solo las válidas
       if (validImagePaths.length > 0) {
+        // Crear copia temporal para evitar mutar durante iteración
+        const newImagePaths = [...validImagePaths];
         imagePaths.length = 0;
-        validImagePaths.forEach(path => imagePaths.push(path));
+        newImagePaths.forEach(path => imagePaths.push(path));
+        
+        if (collageContainer) {
+          createCollage();
+        }  
       }
       
       // Ocultar el loader
-      setTimeout(() => {
-        loader.style.opacity = '0';
-        setTimeout(() => loader.style.display = 'none', 250);
-      }, 300);
+      if (loader) {
+        setTimeout(() => {
+          loader.style.opacity = '0';
+          setTimeout(() => {
+            if (loader.parentNode) {
+              loader.style.display = 'none';
+            }
+          }, 250);
+        }, 300);
+      }
     });
   });
 
-  // Configuración del reproductor de música
-  toggleMusicBtn.addEventListener('click', () => {
-    const spotifyContainer = document.getElementById('spotify-player-container');
-    if (spotifyContainer) {
-      const isVisible = spotifyContainer.style.display !== 'none';
-      spotifyContainer.style.display = isVisible ? 'none' : 'block';
-      toggleMusicBtn.classList.toggle('active', !isVisible);
-      toggleMusicBtn.innerHTML = isVisible ? 
-        '<i class="fas fa-music"></i>' : 
-        '<i class="fas fa-volume-up"></i>';
-    }
-  });
-  
   // Generar estrellas para el modo noche de manera eficiente
   function generateStars() {
     nightColors.stars = [];
@@ -125,6 +137,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Función de redimensionado con debounce para mejor rendimiento
   function resize() {
+    if (!canvas) return;
+    
     W = canvas.width = canvas.offsetWidth;
     H = canvas.height = canvas.offsetHeight;
     leaves = [];
@@ -149,19 +163,23 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   
   window.addEventListener('resize', debounce(resize, 250));
-  resize();
+  
 
   // Modo día/noche
-  toggleModeBtn.addEventListener('click', () => {
-    nightMode = !nightMode;
-    document.body.classList.toggle('night-mode', nightMode);
-    colors = nightMode ? nightColors : dayColors;
-    updateBirdColors();
-    needsRedraw = true;
-  });
+  if (toggleModeBtn) {
+    toggleModeBtn.addEventListener('click', () => {
+      nightMode = !nightMode;
+      document.body.classList.toggle('night-mode', nightMode);
+      colors = nightMode ? nightColors : dayColors;
+      updateBirdColors();
+      needsRedraw = true;
+    });
+  }
 
   // Funciones para manejo de pájaros
   function createBirds(count) {
+    if (!birdsContainer) return;
+    
     for (let i = 0; i < count; i++) {
       const bird = document.createElement('div');
       bird.className = 'bird';
@@ -188,86 +206,88 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   
   function clearBirds() {
+    if (!birdsContainer) return;
     birdsContainer.innerHTML = '';
     birds = [];
   }
-  
-  // Crear pájaros iniciales
-  createBirds(3);
 
-  // Función de dibujo de ramas optimizada
+  // Configuración del reproductor de música
+  if (toggleMusicBtn) {
+    toggleMusicBtn.addEventListener('click', () => {
+      const spotifyContainer = document.getElementById('spotify-player-container');
+      if (spotifyContainer) {
+        const isVisible = spotifyContainer.style.display !== 'none';
+        spotifyContainer.style.display = isVisible ? 'none' : 'block';
+        toggleMusicBtn.classList.toggle('active', !isVisible);
+        toggleMusicBtn.innerHTML = isVisible ? 
+          '<i class="fas fa-music"></i>' : 
+          '<i class="fas fa-volume-up"></i>';
+      }
+    });
+  }
+  
   function drawBranch(x, y, len, ang, depth) {
+    if (!ctx) return;
+    
     if (depth <= 0 || len <= 2) {
       leaves.push({ x, y });
       return;
     }
-    
+
     const prog = Math.min(treeProgress * 1.2, 1);
     const currLen = len * prog;
     const x2 = x + Math.cos(ang) * currLen;
     const y2 = y - Math.sin(ang) * currLen;
 
-    // Dibujar solo si está en la pantalla
-    if (x2 > -10 && x2 < W + 10 && y2 > -10 && y2 < H + 10) {
-      ctx.strokeStyle = depth > 6 ? colors.trunk : colors.branches;
-      ctx.lineWidth = depth * 1.2;
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-      ctx.lineTo(x2, y2);
-      ctx.stroke();
-    }
+    ctx.strokeStyle = depth > 3 ? colors.trunk : colors.branches;
+    ctx.lineWidth = depth * 1.2;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
 
-    // Solo seguir dibujando si estamos en el progreso adecuado
-    if (prog >= (9 - depth + 1) / 9) {
+    if (prog >= (6 - depth + 1) / 6) {
       const nl = len * 0.75;
-      const angleVar = Math.PI / (8 + Math.random() * 2);
-      
-      // Solo dibujar ramas si son visibles (profundidad no muy alta)
-      if (depth > 1) {
-        drawBranch(x2, y2, nl, ang - angleVar, depth - 1);
+      const baseAngleVar = Math.PI / 7;
+      const branchCount = 2;
+
+      for (let i = 0; i < branchCount; i++) {
+        const angleVar = (i === 0 ? -1 : 1) * baseAngleVar;
         drawBranch(x2, y2, nl, ang + angleVar, depth - 1);
-      }
-      
-      // Añadir rama extra en el medio solo para ramas principales
-      if (depth > 6 && Math.random() > 0.7) {
-        drawBranch(x2, y2, nl * 0.85, ang, depth - 1);
       }
     }
   }
 
-  // Función para construir el árbol más eficiente
+  // Dentro de la función buildTree()
   function buildTree() {
+    if (!ctx) return;
+    
     const startX = W / 2;
     const startY = H;
-    const trunkHeight = H * 0.2; // Altura proporcional a la altura del canvas
-    
-    // Dibujar tronco principal
+    const trunkHeight = H * 0.2; // Árbol más bajito (antes 0.28)
+
     ctx.strokeStyle = colors.trunk;
     ctx.lineWidth = 12 * treeProgress;
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     ctx.lineTo(startX, startY - trunkHeight * treeProgress);
     ctx.stroke();
-    
-    // Dibujar ramas principales desde el tronco
+
     if (treeProgress > 0.3) {
-      const branchCount = 3;
+      const branchCount = 3; // Menos ramas (antes 5)
+      const spreadAngle = 0.6; // Ángulo más cerrado
+
       for (let i = 0; i < branchCount; i++) {
-        const angle = Math.PI/2 - 0.2 + (i - branchCount/2 + 0.5) * 0.3;
-        drawBranch(
-          startX, 
-          startY - trunkHeight * treeProgress, 
-          H * 0.18, // Tamaño proporcional 
-          angle, 
-          7 // Profundidad reducida para mejor rendimiento
-        );
+        const angle = Math.PI/2 - spreadAngle/2 + (i / (branchCount - 1)) * spreadAngle;
+        const branchLength = H * 0.18;
+        drawBranch(startX, startY - trunkHeight * treeProgress, branchLength, angle, 5); // Profundidad menor
       }
     }
   }
 
   // Dibujar estrellas en modo noche
   function drawStars() {
-    if (!nightMode || colors.stars.length === 0) return;
+    if (!ctx || !nightMode || colors.stars.length === 0) return;
     
     const pulseVal = Math.sin(Date.now() / 2000) * 0.2;
     ctx.fillStyle = 'white';
@@ -284,7 +304,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Función para crear corazones que caen (sin fotos)
   function createFallingHeart() {
-    if (phase !== 2 || !fallingHeartsActive) return;
+    if (phase !== 2 || !fallingHeartsActive || !heartContainer) return;
     
     // Usar menos hojas para mejor rendimiento
     const leafPositions = leaves.filter((_, i) => i % 20 === 0);
@@ -306,6 +326,7 @@ window.addEventListener('DOMContentLoaded', () => {
     heart.style.width = `${size}px`;
     heart.style.height = `${size}px`;
     
+    heart.style.opacity = 0.8 + Math.random() * 0.2;
     // Eliminar cuando termine la animación para liberar memoria
     heart.addEventListener('animationend', () => {
       if (heart.parentNode) heart.parentNode.removeChild(heart);
@@ -330,17 +351,19 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Generar corazones que caen de manera más eficiente
   function generateFallingHearts() {
-    if (phase !== 2 || !fallingHeartsActive) return;
+    if (phase !== 2 || !fallingHeartsActive || !heartContainer) return;
     
     // Limitar la cantidad de corazones activos
     const activeHearts = document.querySelectorAll('.heart.falling');
-    if (activeHearts.length > 10) {
+    if (activeHearts.length > 8) {
       setTimeout(generateFallingHearts, 4000);
       return;
     }
     
-    // Usar muchas menos hojas
-    const leavesToUse = leaves.filter((_, i) => i % 40 === 0);
+    const topLeaves = leaves.filter(leaf => leaf.y < H * 0.4);
+    const leavesToUse = topLeaves.length > 20 ? 
+      topLeaves.filter((_, i) => i % 5 === 0) : 
+      leaves.filter((_, i) => i % 40 === 0);
     
     // Máximo 3 corazones por ciclo
     const heartsToCreate = Math.min(2, leavesToUse.length);
@@ -359,9 +382,12 @@ window.addEventListener('DOMContentLoaded', () => {
       const randomColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
       heart.style.backgroundColor = randomColor;
       
-      const size = 8 + Math.random() * 8;
+      const size = 10 + Math.random() * 10;
       heart.style.width = `${size}px`;
       heart.style.height = `${size}px`;
+
+      // Añadir un efecto de caída aleatorio
+      heart.style.animationDuration = `${3 + Math.random() * 2}s`;
       
       // Eliminar cuando termine la animación
       heart.addEventListener('animationend', () => {
@@ -371,93 +397,115 @@ window.addEventListener('DOMContentLoaded', () => {
       heartContainer.appendChild(heart);
     }
     
-    // Aumentar el intervalo para menor frecuencia
-    setTimeout(generateFallingHearts, 5000);
+    // Intervalo variable para más naturalidad
+    setTimeout(generateFallingHearts, 3000 + Math.random() * 2000);
   }
 
-  // Crear collage de fotos organizado
+  // Función mejorada para crear el collage
   function createCollage() {
+    if (!collageContainer) {
+      console.error("No se encontró el contenedor del collage");
+      return;
+    }
+
+    // Limpiar el contenedor
     collageContainer.innerHTML = '';
-    
+
     // Si no hay imágenes disponibles, no crear el collage
     if (imagePaths.length === 0) {
+      console.warn("No hay imágenes disponibles para el collage");
       collageContainer.style.display = 'none';
       return;
     }
-    
+
+    console.log(`Creando collage con ${imagePaths.length} imágenes`);
+
     // Usar fragmento para mejor rendimiento
     const fragment = document.createDocumentFragment();
-    
-    // Función para crear un elemento de collage mejorado
-    function createCollageItem(path, index) {
+
+    // Distribuir imágenes en filas fijas
+    imagePaths.forEach((path, index) => {
       const imgWrapper = document.createElement('div');
       imgWrapper.className = 'collage-img';
-      
-      // Añadir variación en la rotación y escala para más estética
-      const rotation = Math.random() * 10 - 5; // -5 a 5 grados
-      const scale = 0.95 + Math.random() * 0.1; // 0.95 a 1.05
-      
-      imgWrapper.style.transform = `rotate(${rotation}deg) scale(${scale})`;
-      
-      // Añadir bordes con diferentes grosores para variedad
-      const borderWidth = 3 + Math.floor(Math.random() * 3); // 3px a 5px
-      imgWrapper.style.borderWidth = `${borderWidth}px`;
-      
+
+      // Crear la imagen
       const img = document.createElement('img');
       img.src = path;
-      img.alt = "Foto de nosotros";
-      img.loading = "lazy"; // Cargar imágenes más eficientemente
-      
+      img.alt = "Foto del collage";
+      img.loading = "lazy"; // Carga diferida
+
       imgWrapper.appendChild(img);
-      return imgWrapper;
-    }
-    
-    // Verificar cada imagen antes de añadirla
-    let loadedCount = 0;
-    const totalImages = imagePaths.length;
-    
-    imagePaths.forEach((path, index) => {
-      const tempImg = new Image();
-      tempImg.onload = () => {
-        fragment.appendChild(createCollageItem(path, index));
-        loadedCount++;
-        
-        // Si todas las imágenes están cargadas, añadir el fragmento al DOM
-        if (loadedCount === totalImages) {
-          collageContainer.appendChild(fragment);
-        }
-      };
-      
-      tempImg.onerror = () => {
-        console.warn(`No se pudo cargar la imagen para el collage: ${path}`);
-        loadedCount++;
-        
-        // Si todas las imágenes están procesadas, añadir el fragmento al DOM
-        if (loadedCount === totalImages) {
-          collageContainer.appendChild(fragment);
-        }
-      };
-      
-      tempImg.src = path;
+      fragment.appendChild(imgWrapper);
     });
+
+    // Añadir el fragmento al DOM
+    collageContainer.appendChild(fragment);
+    collageContainer.style.display = 'grid';
   }
 
-  // Generar hojas (corazones) en el árbol
   function generateLeaves() {
+    if (!heartContainer) return;
+    
     heartContainer.innerHTML = '';
     
     // Usar fragmento para insertar todos los corazones de una vez
     const fragment = document.createDocumentFragment();
     
-    // Solo procesar un subconjunto de hojas para mejor rendimiento, pero más que antes
-    const visibleLeaves = leaves.filter((_, i) => i % 1 === 0);
+    // Distribuir hojas de forma más parecida a la imagen
+    const centerX = W / 2;
+    const centerY = H * 0.4; // Centro de la copa más arriba
+    const radiusX = W * 0.22; // Radio horizontal más amplio
+    const radiusY = H * 0.28; // Radio vertical para copa redondeada
+    
+    // Generar hojas adicionales para mayor densidad
+    const extraLeaves = [];
+    
+    // Crear hojas en forma circular para la copa del árbol
+    for (let angle = 0; angle < Math.PI * 2; angle += 0.05) {
+      for (let r = 0; r < 0.95; r += 0.15) {
+        // Coordenadas dentro de una elipse
+        const x = centerX + Math.cos(angle) * radiusX * r;
+        const y = centerY + Math.sin(angle) * radiusY * r;
+        
+        // Añadir alguna variación para más naturalidad
+        const offsetX = (Math.random() - 0.5) * 15;
+        const offsetY = (Math.random() - 0.5) * 15;
+        
+        extraLeaves.push({
+          x: x + offsetX,
+          y: y + offsetY
+        });
+      }
+    }
+    
+    // Usar tanto las hojas generadas del árbol como las extras
+    const allLeaves = [...leaves, ...extraLeaves];
+    
+    // Añadir algunas hojas que caen
+    for (let i = 0; i < 15; i++) {
+      const baseX = centerX + (Math.random() - 0.5) * radiusX * 2.2;
+      const baseY = H * 0.6 + Math.random() * (H * 0.3);
+      extraLeaves.push({ x: baseX, y: baseY });
+    }
+    
+    // Filtrar para evitar corazones fuera de la pantalla
+    const visibleLeaves = allLeaves.filter((leaf) => {
+      return leaf.x > 0 && leaf.x < W && leaf.y > 0 && leaf.y < H;
+    });
+
+    // Limitar número total de corazones para rendimiento
+    const maxHearts = 200;
+    const stepSize = Math.max(1, Math.floor(visibleLeaves.length / maxHearts));
     
     if (visibleLeaves.length === 0) {
       console.warn("No hay hojas para generar corazones");
       return;
     }
     
-    visibleLeaves.forEach((position, index) => {
+    // Procesar solo un subconjunto de hojas si hay demasiadas
+    for (let i = 0; i < visibleLeaves.length; i += stepSize) {
+      const position = visibleLeaves[i];
+      
       const heart = document.createElement('div');
       heart.classList.add('heart');
       
@@ -469,29 +517,37 @@ window.addEventListener('DOMContentLoaded', () => {
       const randomColor = colorPalette[Math.floor(Math.random() * colorPalette.length)];
       heart.style.backgroundColor = randomColor;
       
-      // Tamaños variados para más dinamismo
-      const size = 8 + Math.random() * 8; // Corazones un poco más grandes
+      // Tamaño variable según la posición
+      const distFromCenter = Math.sqrt(
+        Math.pow((position.x - centerX) / radiusX, 2) + 
+        Math.pow((position.y - centerY) / radiusY, 2)
+      );
+      
+      const sizeBase = 12 + Math.random() * 10;
+      const size = sizeBase * (1 - 0.2 * distFromCenter);
+      
       heart.style.width = `${size}px`;
       heart.style.height = `${size}px`;
       
       // Asegurarnos de que todos los corazones tengan una animación
-      if (index % 4 === 2) {
-        heart.classList.add('permanent');
-      } else {
+      if (i % 10 === 0) {
         heart.classList.add('falling');
+      } else {
+        heart.classList.add('permanent');
+        heart.style.animationDelay = `${Math.random() * 2}s`;
       }
       
       fragment.appendChild(heart);
-    });
+    }
     
     heartContainer.appendChild(fragment);
-    
-    // Verificar si se generaron los corazones
-    console.log(`Generados ${visibleLeaves.length} corazones`);
+    console.log(`Generados ${Math.floor(visibleLeaves.length / stepSize)} corazones`);
   }
 
   // Función de animación optimizada
   function animate(timestamp) {
+    if (!ctx) return;
+    
     // Limitar framerate
     if (timestamp - lastFrameTime < FRAME_INTERVAL) {
       requestAnimationFrame(animate);
@@ -573,9 +629,11 @@ window.addEventListener('DOMContentLoaded', () => {
   // Temporizador optimizado
   function startTimer() {
     // Fecha real a establecer (14 de abril de 2023)
-    const startDate = new Date('2023-04-14T00:00:00');
+    const startDate = new Date('2025-04-14T00:00:00');
     const timerElement = document.getElementById('timer');
     const progressBar = document.querySelector('.progress');
+    
+    if (!timerElement || !progressBar) return;
     
     // Actualizar cada segundo
     const updateTimer = () => {
@@ -599,7 +657,7 @@ window.addEventListener('DOMContentLoaded', () => {
     setInterval(updateTimer, 1000);
   }
   
-  // FORZAR INICIO INMEDIATO DEL ÁRBOL (para depuración)
+  // FORZAR INICIO INMEDIATO DEL ÁRBOL
   function forceStartTree() {
     console.log("Iniciando árbol forzadamente");
     seed.x = W / 2;
@@ -626,25 +684,52 @@ window.addEventListener('DOMContentLoaded', () => {
     if (phase === 0) {
       console.log("Iniciando árbol automáticamente");
       forceStartTree();
-      
       // Crecer rápidamente después de otro segundo
       setTimeout(() => {
         quickGrowTree();
       }, 1000);
     }
   }, 2000);
+
+  // Configurar botón para activar/desactivar corazones que caen
+  if (toggleHeartsBtn) {
+    toggleHeartsBtn.addEventListener('click', () => {
+      fallingHeartsActive = !fallingHeartsActive;
+      toggleHeartsBtn.classList.toggle('active', fallingHeartsActive);
+    
+      if (fallingHeartsActive) {
+        // Generar algunos corazones inmediatamente al activar
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => createFallingHeart(), i * 300);
+        }
+        // Reiniciar el intervalo
+        setTimeout(generateFallingHearts, 2000);
+      }
+    });
   
+    // Activar por defecto
+    toggleHeartsBtn.classList.add('active');
+  }
+
   // Inicializar
+  resize(); // Inicializar tamaños
   startTimer();
   preloadImages().then(validImagePaths => {
     // Actualizar la lista de imágenes con solo las válidas
     if (validImagePaths.length > 0) {
+      // Crear copia temporal para evitar mutar durante iteración
+      const newImagePaths = [...validImagePaths];
       imagePaths.length = 0;
-      validImagePaths.forEach(path => imagePaths.push(path));
-      createCollage();
+      newImagePaths.forEach(path => imagePaths.push(path));
+      
+      if (collageContainer) {
+        createCollage();
+      }
     } else {
       // Si no hay imágenes, esconder el collage
-      collageContainer.style.display = 'none';
+      if (collageContainer) {
+        collageContainer.style.display = 'none';
+      }
     }
     
     // Iniciar la animación del árbol

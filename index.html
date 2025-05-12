@@ -1,68 +1,99 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Árbol del Amor</title>
-  <link rel="stylesheet" href="styles.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <!-- Font Awesome para los iconos -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para el amor de mi vida</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  <!-- Loader para mejorar la carga inicial -->
-  <div id="loader">
-    <div class="loader-heart"></div>
-    <p>Cargando...</p>
-  </div>
-
-  <!-- Área para el collage de fondo (se creará con JavaScript) -->
-  <div id="background-collage" class="background-collage"></div>
-  
-  <main class="card">
-    <!-- Controles (música y modo día/noche) -->
-    <div class="controls">
-      <button id="toggleMusic" class="control-btn" title="Reproducir/Pausar música">
-        <i class="fas fa-music"></i>
-      </button>
-      <button id="toggleMode" class="control-btn" title="Cambiar modo día/noche">
-        <i class="fas fa-moon"></i>
-      </button>
+    <!-- Loader -->
+    <div id="loader">
+        <div class="loader-heart"></div>
+        <p>Cargando nuestro amor...</p>
     </div>
 
-    <!-- Spotify Player Container -->
-    <div id="spotify-player-container" style="display: none; position: absolute; top: 60px; right: 15px; z-index: 100;">
-      <iframe src="https://open.spotify.com/embed/track/4kS2aOd7ic0gGccOWss1JV" 
-              width="80" height="80" frameborder="0" allowtransparency="true" 
-              allow="encrypted-media"></iframe>
-    </div>
+    <!-- Collage de fotos en el fondo -->
+    <div id="background-collage" class="collage-container"></div>
 
-    <!-- Texto romántico -->
-    <section class="text">
-      <h1>Para el amor de mi vida</h1>
-      <p>
-        Si pudiera elegir un lugar seguro, sería a tu lado.<br>
-        Cuanto más tiempo estoy contigo más te amo.<br>
-        Como este árbol, mi amor por ti crece cada día.<br>
-        — I Love You! ❤️
-      </p>
-      <div class="timer">
-        <p>Mi amor por ti comenzó hace...</p>
-        <p id="timer">0 días 0 horas 0 minutos 0 segundos</p>
-        <div class="bar"><div class="progress"></div></div>
+    <!-- Tarjeta principal -->
+    <div class="card">
+        <!-- Controles -->
+        <div class="controls">
+            <button id="toggleMusic" class="control-btn" title="Música">
+                <i class="fas fa-music"></i>
+            </button>
+            <button id="toggleMode" class="control-btn" title="Modo noche">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="toggleHearts" class="control-btn active" title="Corazones">
+                <i class="fas fa-heart"></i>
+            </button>
+        </div>
+        
+        <!-- Contenido de texto -->
+        <div class="text">
+            <h1>Para el amor de mi vida</h1>
+            <p>Si pudiera elegir un lugar seguro, sería a tu lado.<br>
+            Cuanto más tiempo estoy contigo más te amo.<br>
+            Como este árbol, mi amor por ti crece cada día.</p>
+            <p>— I Love You! ❤️</p>
+            
+            <p>Mi amor por ti comenzó hace...</p>
+            
+            <!-- Temporizador -->
+            <div class="timer">
+                <p>Nuestro tiempo juntos</p>
+                <div id="timer">0 días 0 horas 0 minutos 0 segundos</div>
+                <div class="bar">
+                    <div class="progress"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Árbol de amor -->
+        <div class="tree">
+            <canvas id="canvas"></canvas>
+            <div class="heart-container"></div>
+            <div class="birds-container"></div>
+        </div>
+        
+        <!-- Reproductor de Spotify -->
+        
+        <div id="spotify-player-container" style="display: none;">
+        <iframe src="https://open.spotify.com/embed/track/4kS2aOd7ic0gGccOWss1JV" width="80" height="80" 
+            frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+        </div>
+    </div>
+    <button id="toggleGallery" class="control-btn">
+  <i class="fas fa-images"></i>
+</button>
+
+<!-- Galería modal -->
+<div id="photo-gallery" class="photo-gallery">
+  <div class="gallery-content">
+    <span class="close-gallery">&times;</span>
+    
+    <div class="gallery-container">
+      <div class="gallery-main">
+        <img id="current-photo" src="" alt="Foto ampliada">
+        <div class="photo-caption-gallery" id="photo-caption">Nuestra foto</div>
       </div>
-    </section>
-
-    <!-- Árbol animado -->
-    <section class="tree">
-      <canvas id="canvas"></canvas>
-      <div class="heart-container"></div>
-      <div class="birds-container"></div>
-    </section>
-  </main>
-
-  <script src="script.js"></script>
+      
+      <div class="gallery-controls">
+        <button id="prev-photo" class="gallery-nav-btn"><i class="fas fa-chevron-left"></i></button>
+        <button id="next-photo" class="gallery-nav-btn"><i class="fas fa-chevron-right"></i></button>
+      </div>
+      
+      <div class="gallery-thumbnails" id="gallery-thumbnails">
+        <!-- Las miniaturas se cargarán dinámicamente aquí -->
+      </div>
+    </div>
+  </div>
+</div>
+    
+    <script src="script.js"></script>
 </body>
 </html>
