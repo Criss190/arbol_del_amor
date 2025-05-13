@@ -43,7 +43,11 @@ window.addEventListener('DOMContentLoaded', () => {
     "foticos/A.jpg", "foticos/C.jpg", "foticos/E.jpg",
     "foticos/I.jpg", "foticos/MIA.jpg", "foticos/N.jpg", 
     "foticos/P.jpg", "foticos/AM.jpg", 
-    "foticos/CHO.jpg", "foticos/MO.jpg", "foticos/MU.jpg", "foticos/TE.jpg"
+    "foticos/CHO.jpg", "foticos/MO.jpg", "foticos/MU.jpg", "foticos/TE.jpg", 
+    "foticos/R.jpg", "foticos/S.jpg","foticos/T.jpg", "foticos/1.jpg", "foticos/2.jpg", 
+    "foticos/3.jpg", "foticos/4.jpg", 
+    "foticos/5.jpg", "foticos/6.jpg", "foticos/7.jpg", "foticos/8.jpg", 
+    "foticos/9.jpg", "foticos/10.jpg","foticos/11.jpg",
   ];
   
   // Función para precargar imágenes - solo para el collage
@@ -119,6 +123,7 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     });
   });
+  
 
   // Generar estrellas para el modo noche de manera eficiente
   function generateStars() {
@@ -210,6 +215,267 @@ window.addEventListener('DOMContentLoaded', () => {
     birdsContainer.innerHTML = '';
     birds = [];
   }
+// Modificación a la función initPhotoGallery() para permitir agrandar imágenes
+function initPhotoGallery() {
+  const toggleGalleryBtn = document.getElementById('toggleGallery');
+  const galleryModal = document.getElementById('photo-gallery');
+  const closeGalleryBtn = document.querySelector('.close-gallery');
+  const currentPhoto = document.getElementById('current-photo');
+  const photoCaption = document.getElementById('photo-caption');
+  const prevBtn = document.getElementById('prev-photo');
+  const nextBtn = document.getElementById('next-photo');
+  const thumbnailsContainer = document.getElementById('gallery-thumbnails');
+  
+  // Verificar si los elementos existen
+  if (!toggleGalleryBtn || !galleryModal || !thumbnailsContainer) {
+    console.error("Elementos de la galería no encontrados");
+    return;
+  }
+  
+  let currentPhotoIndex = 0;
+  let isFullscreen = false;
+  
+  // Referencias a rutas de imágenes
+  const galleryImages = [...imagePaths]; // Usar las mismas imágenes del collage
+  
+  // Si no hay imágenes, ocultar el botón de la galería
+  if (galleryImages.length === 0) {
+    toggleGalleryBtn.style.display = 'none';
+    return;
+  }
+  
+  // Crear elementos para vista ampliada
+  let fullscreenView = document.querySelector('.fullscreen-view');
+  
+  // Si no existe la vista ampliada, crearla
+  if (!fullscreenView) {
+    fullscreenView = document.createElement('div');
+    fullscreenView.className = 'fullscreen-view';
+    fullscreenView.style.display = 'none';
+    fullscreenView.innerHTML = `
+      <div class="fullscreen-container">
+        <span class="close-fullscreen">&times;</span>
+        <img id="fullscreen-image" src="" alt="Imagen ampliada">
+      </div>
+    `;
+    document.body.appendChild(fullscreenView);
+  } else {
+    // Si ya existe, asegurarse de que esté oculta
+    fullscreenView.style.display = 'none';
+  }
+  
+  const fullscreenImage = document.getElementById('fullscreen-image') || 
+                         fullscreenView.querySelector('img');
+  const closeFullscreen = fullscreenView.querySelector('.close-fullscreen');
+  
+  // Generar miniaturas para la galería
+  function generateThumbnails() {
+    thumbnailsContainer.innerHTML = '';
+    
+    galleryImages.forEach((src, index) => {
+      const thumbnail = document.createElement('div');
+      thumbnail.className = 'gallery-thumbnail';
+      
+      // Crear la imagen y manejar errores
+      const img = document.createElement('img');
+      img.src = src;
+      img.alt = `Miniatura ${index + 1}`;
+      img.onerror = function() {
+        this.src = 'placeholder.jpg'; // Imagen de respaldo
+        console.warn(`No se pudo cargar la imagen: ${src}`);
+      };
+      
+      thumbnail.appendChild(img);
+      
+      // Añadir clase 'active' a la miniatura actual
+      if (index === currentPhotoIndex) {
+        thumbnail.classList.add('active');
+      }
+      
+      // Añadir evento click
+      thumbnail.addEventListener('click', () => {
+        currentPhotoIndex = index;
+        updateMainPhoto();
+      });
+      
+      thumbnailsContainer.appendChild(thumbnail);
+    });
+  }
+  
+  // Actualizar la foto principal
+  function updateMainPhoto() {
+    if (galleryImages.length === 0) return;
+    
+    // Actualizar la imagen principal con manejo de errores
+    currentPhoto.src = galleryImages[currentPhotoIndex];
+    currentPhoto.onerror = function() {
+      this.src = 'placeholder.jpg'; // Imagen de respaldo
+      console.warn(`No se pudo cargar la imagen principal: ${galleryImages[currentPhotoIndex]}`);
+    };
+    
+    // Actualizar el pie de foto (puedes personalizar los textos)
+    const captions = [
+      "Nuestro amor es único",
+      "Momentos especiales juntos",
+      "Siempre en mi corazón",
+      "Eres mi felicidad",
+      "Te amo cada día más"
+    ];
+    
+    // Usar un título personalizado o el genérico
+    if (photoCaption) {
+      photoCaption.textContent = captions[currentPhotoIndex % captions.length];
+    }
+    
+    // Actualizar miniaturas activas
+    const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+    thumbnails.forEach((thumb, idx) => {
+      thumb.classList.toggle('active', idx === currentPhotoIndex);
+    });
+  }
+  
+  // Función para abrir la vista ampliada
+  function openFullscreen() {
+    console.log("Abriendo vista ampliada");
+    if (fullscreenImage) {
+      fullscreenImage.src = galleryImages[currentPhotoIndex];
+    }
+    if (fullscreenView) {
+      fullscreenView.style.display = 'flex';
+    }
+    document.body.style.overflow = 'hidden'; // Evitar scroll
+    isFullscreen = true;
+  }
+  
+  // Función para cerrar la vista ampliada
+  function closeFullscreenView() {
+    console.log("Cerrando vista ampliada");
+    if (fullscreenView) {
+      fullscreenView.style.display = 'none';
+    }
+    document.body.style.overflow = ''; // Restaurar scroll
+    isFullscreen = false;
+  }
+  
+  // Eventos para navegar por las fotos
+  function setupGalleryNavigation() {
+    // Botón anterior
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => {
+        currentPhotoIndex = (currentPhotoIndex - 1 + galleryImages.length) % galleryImages.length;
+        updateMainPhoto();
+        if (isFullscreen && fullscreenImage) {
+          fullscreenImage.src = galleryImages[currentPhotoIndex];
+        }
+      });
+    }
+    
+    // Botón siguiente
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => {
+        currentPhotoIndex = (currentPhotoIndex + 1) % galleryImages.length;
+        updateMainPhoto();
+        if (isFullscreen && fullscreenImage) {
+          fullscreenImage.src = galleryImages[currentPhotoIndex];
+        }
+      });
+    }
+    
+    // Hacer clic en la imagen principal para agrandarla
+    if (currentPhoto) {
+      currentPhoto.style.cursor = 'zoom-in'; // Indicador visual
+      currentPhoto.addEventListener('click', () => {
+        console.log("Clic en imagen principal");
+        openFullscreen();
+      });
+    }
+    
+    // Cerrar vista ampliada
+    if (closeFullscreen) {
+      closeFullscreen.addEventListener('click', (e) => {
+        e.stopPropagation(); // Evitar propagación
+        closeFullscreenView();
+      });
+    }
+    
+    // También cerrar con ESC
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (isFullscreen) {
+          closeFullscreenView();
+        } else if (galleryModal && galleryModal.style.display === 'flex') {
+          galleryModal.style.display = 'none';
+        }
+      }
+    });
+    
+    // Navegación con teclado cuando la galería está abierta
+    document.addEventListener('keydown', (e) => {
+      if ((galleryModal && galleryModal.style.display === 'flex') || isFullscreen) {
+        if (e.key === 'ArrowLeft') {
+          currentPhotoIndex = (currentPhotoIndex - 1 + galleryImages.length) % galleryImages.length;
+          updateMainPhoto();
+          if (isFullscreen && fullscreenImage) {
+            fullscreenImage.src = galleryImages[currentPhotoIndex];
+          }
+        } else if (e.key === 'ArrowRight') {
+          currentPhotoIndex = (currentPhotoIndex + 1) % galleryImages.length;
+          updateMainPhoto();
+          if (isFullscreen && fullscreenImage) {
+            fullscreenImage.src = galleryImages[currentPhotoIndex];
+          }
+        }
+      }
+    });
+    
+    // Permitir hacer clic en la vista fullscreen para cerrarla
+    if (fullscreenView) {
+      fullscreenView.addEventListener('click', (e) => {
+        if (e.target === fullscreenView) {
+          closeFullscreenView();
+        }
+      });
+    }
+  }
+  
+  // Abrir la galería
+  if (toggleGalleryBtn && galleryModal) {
+    toggleGalleryBtn.addEventListener('click', () => {
+      galleryModal.style.display = 'flex';
+      generateThumbnails();
+      updateMainPhoto();
+      
+      // Hacer que la galería sea enfocable para la navegación con teclado
+      galleryModal.tabIndex = 0;
+      galleryModal.focus();
+    });
+  }
+  
+  // Cerrar la galería
+  if (closeGalleryBtn) {
+    closeGalleryBtn.addEventListener('click', () => {
+      galleryModal.style.display = 'none';
+    });
+  }
+  
+  // También cerrar haciendo clic fuera del contenido
+  if (galleryModal) {
+    galleryModal.addEventListener('click', (e) => {
+      if (e.target === galleryModal) {
+        galleryModal.style.display = 'none';
+      }
+    });
+  }
+  
+  // Configurar navegación
+  setupGalleryNavigation();
+  
+  // Inicializar la galería automáticamente si está abierta
+  if (galleryModal && galleryModal.style.display === 'flex') {
+    generateThumbnails();
+    updateMainPhoto();
+  }
+}
 
   // Configuración del reproductor de música
   if (toggleMusicBtn) {
@@ -626,6 +892,8 @@ window.addEventListener('DOMContentLoaded', () => {
     requestAnimationFrame(animate);
   }
 
+  
+
   // Temporizador optimizado
   function startTimer() {
     // Fecha real a establecer (14 de abril de 2023)
@@ -712,6 +980,7 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // Inicializar
+ // Inicializar
   resize(); // Inicializar tamaños
   startTimer();
   preloadImages().then(validImagePaths => {
@@ -725,10 +994,17 @@ window.addEventListener('DOMContentLoaded', () => {
       if (collageContainer) {
         createCollage();
       }
+      
+      // Inicializar la galería de fotos
+      initPhotoGallery();
     } else {
-      // Si no hay imágenes, esconder el collage
+      // Si no hay imágenes, esconder el collage y la galería
       if (collageContainer) {
         collageContainer.style.display = 'none';
+      }
+      const galleryBtn = document.getElementById('toggleGallery');
+      if (galleryBtn) {
+        galleryBtn.style.display = 'none';
       }
     }
     
