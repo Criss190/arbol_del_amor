@@ -315,11 +315,18 @@ function initPhotoGallery() {
     
     // Actualizar el pie de foto (puedes personalizar los textos)
     const captions = [
-      "Nuestro amor es único",
-      "Momentos especiales juntos",
-      "Siempre en mi corazón",
-      "Eres mi felicidad",
-      "Te amo cada día más"
+      "Yo siempre pensé",
+      "Que el amor es una desición",
+      "Pues decidir en tu corazón",
+      "Quien sera tu verdadero amor",
+      "Es algo que pocos hacen con valor",
+      "Te amo al infinito y",
+      "Siempre te lo voy a decir",
+      "Pues no pienso soltar ",
+      "A una mujer que me hace tan feliz",
+      "",
+      "Eres mi razón de sonreír",
+      "Te amo más que ayer",
     ];
     
     // Usar un título personalizado o el genérico
